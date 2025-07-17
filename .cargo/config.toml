@@ -6,7 +6,10 @@ build-libs = "build --release"
 swift-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language swift --out-dir bindings"
 
 # Generate Kotlin bindings (requires libs to be built first)
-kotlin-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language kotlin --out-dir bindings"
+kotlin-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language kotlin --out-dir bindings --no-format"
 
 # Generate Python bindings (requires libs to be built first)
-python-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language python --out-dir bindings" 
+python-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language python --out-dir bindings --no-format"
+
+# Generate Ruby bindings (requires libs to be built first)
+ruby-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language ruby --out-dir bindings --no-format" 

@@ -48,32 +48,18 @@ Or using [just](https://github.com/casey/just) (install with `cargo install just
 just swift
 ```
 
-#### Manual commands:
-
+#### Manual command (if needed):
 ```bash
 # Build the library (creates both libstx2btc.dylib and libstx2btc.a)
 cargo build --release
 
 # Generate Swift bindings (uses .dylib for introspection, but bindings work with both .dylib and .a)
-cargo run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language swift --out-dir bindings
+cargo run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language swift --out-dir bindings --no-format
 ```
 
 This will create the `bindings/` directory with the Swift files.
 
 **Note**: The binding generation uses the `.dylib` file to introspect the interface, but the generated Swift bindings work with both the dynamic library (`.dylib`) and static library (`.a`) - you choose which to link at build time in Xcode.
-
-#### Other languages:
-
-```bash
-# Using cargo aliases
-cargo kotlin-bindings  # Kotlin
-cargo python-bindings  # Python
-
-# Using just
-just kotlin   # Kotlin
-just python   # Python
-just all      # All languages
-```
 
 ### Using in Swift
 
@@ -120,12 +106,22 @@ enum ConversionError: Error {
 }
 ```
 
-### Other Languages
+## Other Language Bindings (Untested)
 
-UniFFI supports generating bindings for multiple languages. You can generate bindings for other languages by changing the `--language` parameter:
+UniFFI supports generating bindings for additional languages including kotlin, python and ruby. These are available but **untested**:
 
-- `--language kotlin` for Kotlin/Android
-- `--language python` for Python
-- `--language ruby` for Ruby
+### Quick commands:
+```bash
+# Using cargo aliases
+cargo kotlin-bindings  # Kotlin/Android
+cargo python-bindings  # Python
+cargo ruby-bindings    # Ruby
+
+# Using just
+just kotlin   # Kotlin/Android
+just python   # Python  
+just ruby     # Ruby
+just all      # All languages (Swift, Kotlin, Python, Ruby)
+```
 
 See the [UniFFI documentation](https://mozilla.github.io/uniffi-rs/) for more details on supported languages and usage.

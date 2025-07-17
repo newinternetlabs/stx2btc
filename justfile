@@ -14,8 +14,12 @@ kotlin: build
 python: build
     cargo python-bindings
 
+# Generate Ruby bindings (builds first if needed)
+ruby: build
+    cargo ruby-bindings
+
 # Generate all language bindings
-all: swift kotlin python
+all: swift kotlin python ruby
 
 # Clean generated files
 clean:
