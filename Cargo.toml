@@ -2,6 +2,8 @@
 name = "stx2btc"
 version = "0.1.0"
 edition = "2021"
+description = "A tool for converting STX addresses to BTC addresses"
+license = "MIT"
 
 [dependencies]
 c32address = "0.1.0"
