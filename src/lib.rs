@@ -12,14 +12,15 @@ use bech32::{segwit, hrp};
 /// SegWit address (starting with 'bc1' for mainnet) using that same HASH160.
 /// 
 /// Only supports conversion to P2WPKH (Pay to Witness Public Key Hash) addresses.
-pub fn stx2btc(stx_address: &str) -> Result<String, segwit::EncodeError> {
+#[uniffi::export]
+pub fn stx2btc(stx_address: &str) -> Result<String, ConversionError> {
     // Decode the Stacks address, handling the Result
     let (_decoded_version, decoded_bytes) = decode_address(stx_address).expect("Failed to decode address");
     
     // we should use the proper hrp for the stacks address network (mainnet, testnet, etc)
-    let segwit_address = segwit::encode_v0(hrp::BC, &decoded_bytes);
+    let segwit_address = segwit::encode_v0(hrp::BC, &decoded_bytes)?;
 
-    segwit_address
+    Ok(segwit_address)
 }
 
 /// Converts a Bitcoin (BTC) native SegWit address to a Stacks (STX) address
@@ -30,9 +31,9 @@ pub fn stx2btc(stx_address: &str) -> Result<String, segwit::EncodeError> {
 ///
 /// Only supports P2WPKH (version 0) addresses because P2TR (version 1) addresses use
 /// different underlying data that can't be converted to a Stacks address format without the original public key.
+#[uniffi::export]
 pub fn btc2stx(btc_address: &str) -> Result<String, ConversionError> {
-    let (_hrp, _version, decoded_bytes) = segwit::decode(btc_address)
-        .map_err(ConversionError::from)?;
+    let (_hrp, _version, decoded_bytes) = segwit::decode(btc_address)?;
 
     // Only handle version 0 (P2WPKH) addresses because we can't generate a taproot address without
     // the original public key (decoding the stacks address gives us only the 20 byte HASH160)
@@ -46,15 +47,25 @@ pub fn btc2stx(btc_address: &str) -> Result<String, ConversionError> {
     Ok(stx_address)
 }
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum ConversionError {
-    SegwitDecode(segwit::DecodeError),
+    #[error("Segwit decode error: {0}")]
+    SegwitDecode(String),
+    #[error("Unsupported version")]
     UnsupportedVersion,
+    #[error("Segwit encode error: {0}")]
+    SegwitEncode(String),
 }
 
 impl From<segwit::DecodeError> for ConversionError {
     fn from(err: segwit::DecodeError) -> Self {
-        ConversionError::SegwitDecode(err)
+        ConversionError::SegwitDecode(err.to_string())
+    }
+}
+
+impl From<segwit::EncodeError> for ConversionError {
+    fn from(err: segwit::EncodeError) -> Self {
+        ConversionError::SegwitEncode(err.to_string())
     }
 }
 
@@ -75,3 +86,5 @@ mod tests {
         assert_eq!(result2.unwrap(), stx_address);
     }
 }
+
+uniffi::setup_scaffolding!();

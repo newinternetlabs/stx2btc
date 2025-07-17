@@ -1,1 +1,7 @@
 /target
+/bindings
+*.dylib
+*.a
+*.so
+Cargo.lock
+.DS_Store

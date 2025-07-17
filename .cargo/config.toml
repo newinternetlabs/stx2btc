@@ -1,0 +1,12 @@
+[alias]
+# Build both static and dynamic libraries
+build-libs = "build --release"
+
+# Generate Swift bindings (requires libs to be built first)
+swift-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language swift --out-dir bindings"
+
+# Generate Kotlin bindings (requires libs to be built first)
+kotlin-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language kotlin --out-dir bindings"
+
+# Generate Python bindings (requires libs to be built first)
+python-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language python --out-dir bindings" 

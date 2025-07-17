@@ -12,3 +12,120 @@ This library is only a proof concept example. Do not use in production.
 - Convert Bitcoin native SegWit addresses back to Stacks addresses (P2WPKH only)
 - Maintains the same underlying HASH160 between address formats
 - Only supports mainnet addresses
+
+## Usage
+
+### Basic Rust Usage
+
+```rust
+use stx2btc::{stx2btc, btc2stx};
+
+let stx_address = "SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP";
+let btc_address = stx2btc(stx_address).unwrap();
+println!("{}", btc_address); // bc1qkcypfjrcs9c0txx3ql029cckcnd498nuvl6wpy
+
+let back_to_stx = btc2stx(&btc_address).unwrap();
+println!("{}", back_to_stx); // SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP
+```
+
+## Swift Bindings
+
+This crate includes Swift bindings generated using [UniFFI](https://mozilla.github.io/uniffi-rs/). The bindings allow you to use the library from Swift/iOS applications.
+
+**Note**: Bindings are not included in the repository and must be generated locally.
+
+### Generating Swift Bindings
+
+#### Quick commands (recommended):
+
+Using cargo aliases:
+```bash
+cargo build-libs && cargo swift-bindings
+```
+
+Or using [just](https://github.com/casey/just) (install with `cargo install just`):
+```bash
+just swift
+```
+
+#### Manual commands:
+
+```bash
+# Build the library (creates both libstx2btc.dylib and libstx2btc.a)
+cargo build --release
+
+# Generate Swift bindings (uses .dylib for introspection, but bindings work with both .dylib and .a)
+cargo run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language swift --out-dir bindings
+```
+
+This will create the `bindings/` directory with the Swift files.
+
+**Note**: The binding generation uses the `.dylib` file to introspect the interface, but the generated Swift bindings work with both the dynamic library (`.dylib`) and static library (`.a`) - you choose which to link at build time in Xcode.
+
+#### Other languages:
+
+```bash
+# Using cargo aliases
+cargo kotlin-bindings  # Kotlin
+cargo python-bindings  # Python
+
+# Using just
+just kotlin   # Kotlin
+just python   # Python
+just all      # All languages
+```
+
+### Using in Swift
+
+The generated Swift bindings are located in the `bindings/` directory. You can integrate them into your iOS/macOS project:
+
+#### Option 1: Using static library (recommended for most cases)
+Works on both macOS and iOS:
+1. Copy `stx2btc.swift`, `stx2btcFFI.h`, and `stx2btcFFI.modulemap` to your Xcode project
+2. Copy the `libstx2btc.a` static library to your project
+3. Link the static library in your Xcode project settings
+4. Use the functions in your Swift code
+
+#### Option 2: Using dynamic library (macOS only)
+For macOS development/testing when you want smaller binaries:
+1. Copy `stx2btc.swift`, `stx2btcFFI.h`, and `stx2btcFFI.modulemap` to your Xcode project
+2. Copy the `libstx2btc.dylib` library to your project
+3. Use the functions in your Swift code
+
+**Note**: iOS requires the static library (`.a`) for App Store distribution, but macOS can use either.
+
+```swift
+import Foundation
+
+do {
+    let btcAddress = try stx2btc(stxAddress: "SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP")
+    print(btcAddress) // bc1qkcypfjrcs9c0txx3ql029cckcnd498nuvl6wpy
+    
+    let backToStx = try btc2stx(btcAddress: btcAddress)
+    print(backToStx) // SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP
+} catch {
+    print("Conversion error: \(error)")
+}
+```
+
+### Error Handling
+
+The Swift bindings include proper error handling with the `ConversionError` enum:
+
+```swift
+enum ConversionError: Error {
+    case SegwitDecode(String)
+    case UnsupportedVersion
+    case SegwitEncode(String)
+}
+```
+
+### Other Languages
+
+UniFFI supports generating bindings for multiple languages. You can generate bindings for other languages by changing the `--language` parameter:
+
+- `--language kotlin` for Kotlin/Android
+- `--language python` for Python
+- `--language ruby` for Ruby
+
+See the [UniFFI documentation](https://mozilla.github.io/uniffi-rs/) for more details on supported languages and usage.

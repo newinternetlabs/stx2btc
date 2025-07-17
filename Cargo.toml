@@ -5,6 +5,15 @@ edition = "2021"
 description = "A tool for converting STX addresses to BTC addresses"
 license = "MIT"
 
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
 [dependencies]
 c32address = "0.1.0"
 bech32 = "0.11.0"
+thiserror = "1.0"
+uniffi = { version = "0.29.3", features = ["cli"] }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
