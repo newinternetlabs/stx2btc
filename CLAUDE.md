@@ -27,6 +27,16 @@ just python   # Python bindings (untested)
 just ruby     # Ruby bindings (untested)
 just all      # All language bindings
 
+# Build XCFramework for iOS (device + simulator)
+just xcframework
+# or
+./build-xcframework.sh
+
+# Swift Package validation and sync
+just validate       # Check if Swift bindings are in sync with Rust
+just sync-bindings  # Update Swift bindings after Rust changes
+just release        # Full release workflow: validate, test, build XCFramework
+
 # Clean build artifacts and bindings
 just clean
 ```

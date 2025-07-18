@@ -31,4 +31,24 @@ test:
     cargo test
 
 # Development workflow: clean, test, build, and generate Swift bindings
-dev: clean test swift 
+dev: clean test swift
+
+# Build XCFramework for iOS (device + simulator)
+xcframework:
+    ./build-xcframework.sh
+
+# Validate that Swift bindings are in sync with Rust library
+validate:
+    ./validate-bindings.sh
+
+# Sync Swift bindings to Sources directory (run after Rust changes)
+sync-bindings:
+    cargo build-libs
+    cargo swift-bindings
+    cp bindings/stx2btc.swift Sources/stx2btc/
+    git add Sources/stx2btc/stx2btc.swift
+    @echo "✅ Swift bindings updated and staged for commit"
+    @echo "Ready to commit with: git commit -m 'Update Swift bindings'"
+
+# Full release workflow: validate, test, build XCFramework
+release: validate test xcframework 

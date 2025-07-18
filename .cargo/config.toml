@@ -12,4 +12,6 @@ kotlin-bindings = "run --bin uniffi-bindgen generate --library target/release/li
 python-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language python --out-dir bindings --no-format"
 
 # Generate Ruby bindings (requires libs to be built first)
-ruby-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language ruby --out-dir bindings --no-format" 
+ruby-bindings = "run --bin uniffi-bindgen generate --library target/release/libstx2btc.dylib --language ruby --out-dir bindings --no-format"
+
+ 

@@ -28,11 +28,58 @@ let back_to_stx = btc2stx(&btc_address).unwrap();
 println!("{}", back_to_stx); // SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP
 ```
 
-## Swift Bindings
+## Swift Package Manager Integration
 
-This crate includes Swift bindings generated using [UniFFI](https://mozilla.github.io/uniffi-rs/). The bindings allow you to use the library from Swift/iOS applications.
+This library is distributed as a Swift Package with both source code and binary components.
 
-**Note**: Bindings are not included in the repository and must be generated locally.
+### Installation
+
+#### Option 1: Swift Package Manager (Recommended)
+Add this package to your Xcode project:
+1. In Xcode: File → Add Package Dependencies
+2. Enter the repository URL or local path
+3. The package will automatically handle the XCFramework and Swift bindings
+
+#### Option 2: Manual XCFramework Integration
+For manual integration, build the XCFramework:
+
+```bash
+# Using just
+just xcframework
+
+# Or directly
+./build-xcframework.sh
+```
+
+This creates an XCFramework at `target/xcframework/stx2btc.xcframework` containing:
+- iOS device binary (arm64)
+- iOS Simulator binary (arm64 for Apple Silicon)
+- Headers and module map
+- Swift bindings file
+
+To use the XCFramework in your Xcode project:
+1. Drag `target/xcframework/stx2btc.xcframework` into your Xcode project
+2. Add `target/xcframework/stx2btc.swift` to your project
+3. In your target's build settings, add to "Other Linker Flags": `-lc++ -lresolv`
+4. Import and use as shown in the Swift usage examples below
+
+### Keeping Bindings in Sync
+
+For contributors: When modifying the Rust library, ensure Swift bindings stay in sync:
+
+```bash
+# After making Rust changes, sync the bindings
+just sync-bindings                    # Updates and stages Swift bindings
+git commit -m "Update Swift bindings" # Commit the changes
+
+# Validate bindings before releases
+just validate
+
+# Full release workflow (validate, test, build)
+just release
+```
+
+**Note**: Swift bindings in `Sources/stx2btc/` are committed to git and must be kept in sync with the Rust library.
 
 ### Generating Swift Bindings
 

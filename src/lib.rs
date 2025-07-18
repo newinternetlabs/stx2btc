@@ -79,7 +79,7 @@ mod tests {
         let result = stx2btc(stx_address);
         println!("{:?}", result);
         
-        assert_eq!(result.clone().unwrap(), "bc1qkcypfjrcs9c0txx3ql029cckcnd498nuvl6wpy");
+        assert_eq!(result.as_ref().unwrap(), "bc1qkcypfjrcs9c0txx3ql029cckcnd498nuvl6wpy");
 
         let result2 = btc2stx(result.unwrap().as_str());
         println!("{:?}", result2);

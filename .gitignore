@@ -5,3 +5,6 @@
 *.so
 Cargo.lock
 .DS_Store
+
+# Exclude XCFramework build output (but keep Sources/ committed)
+target/xcframework/
