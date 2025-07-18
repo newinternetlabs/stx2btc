@@ -49,4 +49,9 @@ check:
 dev: clean test swift
 
 # Full release workflow: clean, test, build everything
-release: clean test build all xcframework 
+release: clean test build all xcframework
+
+# Create a GitHub release with version tag
+# Usage: just publish v1.0.0
+publish version:
+    ./release.sh {{version}} 

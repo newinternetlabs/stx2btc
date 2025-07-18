@@ -7,6 +7,11 @@ stx2btc is a Rust library that converts between Stacks (STX) and Bitcoin (BTC) n
 
 ## Build Commands
 ```bash
+# Default command: run tests and build
+just
+# or
+just default
+
 # Build the library (creates both .dylib and .a)
 cargo build --release
 # or
@@ -17,11 +22,14 @@ cargo test
 # or
 just test
 
-# Full development workflow (clean, test, build, Swift bindings)
+# Clean build artifacts and bindings
+just clean
+
+# Development workflow: clean, test, and update Swift bindings
 just dev
 
-# Generate language bindings (requires build first)
-just swift    # Swift bindings (tested)
+# Generate language bindings (auto-builds if needed)
+just swift    # Swift bindings (auto-syncs to Sources/)
 just kotlin   # Kotlin bindings (untested)
 just python   # Python bindings (untested)
 just ruby     # Ruby bindings (untested)
@@ -32,13 +40,14 @@ just xcframework
 # or
 ./build-xcframework.sh
 
-# Swift Package validation and sync
-just validate       # Check if Swift bindings are in sync with Rust
-just sync-bindings  # Update Swift bindings after Rust changes
-just release        # Full release workflow: validate, test, build XCFramework
+# Quick check: validate Swift bindings and run tests
+just check
 
-# Clean build artifacts and bindings
-just clean
+# Full release workflow: clean, test, build everything
+just release
+
+# Create GitHub release with version tag
+just publish v1.0.0
 ```
 
 ## Architecture

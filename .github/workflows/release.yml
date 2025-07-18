@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-apple-ios, aarch64-apple-ios-sim
+    
+    - name: Build XCFramework
+      run: |
+        ./build-xcframework.sh
+        cd target/xcframework
+        zip -r stx2btc.xcframework.zip stx2btc.xcframework
+        echo "CHECKSUM=$(swift package compute-checksum stx2btc.xcframework.zip)" >> $GITHUB_ENV
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload XCFramework
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: target/xcframework/stx2btc.xcframework.zip
+        asset_name: stx2btc.xcframework.zip
+        asset_content_type: application/zip
+    
+    - name: Update Package.swift
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/stx2btc.xcframework.zip"
+        
+        # Create updated Package.swift
+        cat > Package.swift.new << 'EOF'
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "stx2btc",
+    platforms: [.iOS(.v13)],
+    products: [
+        .library(
+            name: "stx2btc",
+            targets: ["stx2btc"]),
+    ],
+    dependencies: [],
+    targets: [
+        .binaryTarget(
+            name: "stx2btcFFI",
+            url: "$DOWNLOAD_URL",
+            checksum: "$CHECKSUM"
+        ),
+        .target(
+            name: "stx2btc",
+            dependencies: ["stx2btcFFI"],
+            path: "Sources/stx2btc"
+        ),
+    ]
+)
+EOF
+        # Replace variables
+        sed -i '' "s|\$DOWNLOAD_URL|${DOWNLOAD_URL}|g" Package.swift.new
+        sed -i '' "s|\$CHECKSUM|${CHECKSUM}|g" Package.swift.new
+        mv Package.swift.new Package.swift
+        
+        # Commit and push
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add Package.swift
+        git commit -m "Update Package.swift for release ${TAG_NAME}"
+        git push origin HEAD:main

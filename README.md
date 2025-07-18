@@ -30,18 +30,28 @@ println!("{}", back_to_stx); // SP2V0G568F20Q1XCRT43XX8Q32V2DPMMYFHHBD8PP
 
 ## Swift Package Manager Integration
 
-This library is distributed as a Swift Package with both source code and binary components.
+This library is distributed as a Swift Package with both source code and pre-built binary components.
 
 ### Installation
 
-#### Option 1: Swift Package Manager (Recommended)
 Add this package to your Xcode project:
 1. In Xcode: File → Add Package Dependencies
-2. Enter the repository URL or local path
-3. The package will automatically handle the XCFramework and Swift bindings
+2. Enter the repository URL: `https://github.com/newinternetlabs/stx2btc`
+3. Select version rule (e.g., "Up to Next Major Version")
+4. Add the package to your target
 
-#### Option 2: Manual XCFramework Integration
-For manual integration, build the XCFramework:
+Then in your Swift code:
+```swift
+import stx2btc
+```
+
+The package includes:
+- Pre-built XCFramework binary for iOS (device & simulator)
+- Swift source bindings
+- Automatic linking configuration
+
+### Building XCFramework Locally
+For development or if you need to rebuild the XCFramework:
 
 ```bash
 # Using just
@@ -63,19 +73,21 @@ To use the XCFramework in your Xcode project:
 3. In your target's build settings, add to "Other Linker Flags": `-lc++ -lresolv`
 4. Import and use as shown in the Swift usage examples below
 
-### Keeping Bindings in Sync
+### Development Workflow
 
 For contributors: When modifying the Rust library, ensure Swift bindings stay in sync:
 
 ```bash
-# After making Rust changes, sync the bindings
-just sync-bindings                    # Updates and stages Swift bindings
-git commit -m "Update Swift bindings" # Commit the changes
+# Development workflow: clean, test, and update Swift bindings
+just dev
 
-# Validate bindings before releases
-just validate
+# Quick check: validate Swift bindings and run tests
+just check
 
-# Full release workflow (validate, test, build)
+# Create a new release (builds everything and publishes to GitHub)
+just publish v1.0.0
+
+# Full local build workflow (clean, test, build everything)
 just release
 ```
 
