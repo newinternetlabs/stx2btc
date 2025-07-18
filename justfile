@@ -1,54 +1,52 @@
+# Default command: run tests and build
+default: test build
+
 # Build both static and dynamic libraries
 build:
     cargo build-libs
 
-# Generate Swift bindings (builds first if needed)
-swift: build
-    cargo swift-bindings
-
-# Generate Kotlin bindings (builds first if needed)
-kotlin: build
-    cargo kotlin-bindings
-
-# Generate Python bindings (builds first if needed)
-python: build
-    cargo python-bindings
-
-# Generate Ruby bindings (builds first if needed)
-ruby: build
-    cargo ruby-bindings
-
-# Generate all language bindings
-all: swift kotlin python ruby
+# Test the library
+test:
+    cargo test
 
 # Clean generated files
 clean:
     cargo clean
     rm -rf bindings
 
-# Test the library
-test:
-    cargo test
+# Generate Swift bindings and sync to Sources
+swift: build
+    cargo swift-bindings
+    cp bindings/stx2btc.swift Sources/stx2btc/
+    git add Sources/stx2btc/stx2btc.swift
+    @echo "✅ Swift bindings updated and staged for commit"
 
-# Development workflow: clean, test, build, and generate Swift bindings
-dev: clean test swift
+# Generate Kotlin bindings
+kotlin: build
+    cargo kotlin-bindings
+
+# Generate Python bindings
+python: build
+    cargo python-bindings
+
+# Generate Ruby bindings
+ruby: build
+    cargo ruby-bindings
+
+# Generate all language bindings
+all: swift kotlin python ruby
 
 # Build XCFramework for iOS (device + simulator)
 xcframework:
     ./build-xcframework.sh
 
-# Validate that Swift bindings are in sync with Rust library
-validate:
+# Quick check: validate Swift bindings and run tests
+check:
     ./validate-bindings.sh
+    cargo test
 
-# Sync Swift bindings to Sources directory (run after Rust changes)
-sync-bindings:
-    cargo build-libs
-    cargo swift-bindings
-    cp bindings/stx2btc.swift Sources/stx2btc/
-    git add Sources/stx2btc/stx2btc.swift
-    @echo "✅ Swift bindings updated and staged for commit"
-    @echo "Ready to commit with: git commit -m 'Update Swift bindings'"
+# Development workflow: clean, test, and update Swift bindings
+dev: clean test swift
 
-# Full release workflow: validate, test, build XCFramework
-release: validate test xcframework 
+# Full release workflow: clean, test, build everything
+release: clean test build all xcframework 
