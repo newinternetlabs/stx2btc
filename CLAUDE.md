@@ -53,7 +53,7 @@ just publish v1.0.0
 ## Architecture
 The library consists of:
 - **Core library** (`src/lib.rs`): Two public functions `stx2btc` and `btc2stx`
-- **FFI interface**: Uses UniFFI scaffolding with `src/lib.udl` defining the interface
+- **FFI interface**: Uses UniFFI scaffolding via `uniffi::setup_scaffolding!()` macro
 - **Bindings generator**: `uniffi-bindgen.rs` creates language-specific bindings
 
 Key technical constraints:
