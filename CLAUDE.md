@@ -5,6 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Overview
 stx2btc is a Rust library that converts between Stacks (STX) and Bitcoin (BTC) native SegWit addresses. It includes FFI bindings for Swift, Kotlin, Python, and Ruby via UniFFI.
 
+## Git Workflow
+- **NEVER** make changes directly on the `master` branch
+- Always work on the `develop` branch or feature branches
+- The `master` branch is protected and reserved for releases only
+- Default branch for development is `develop`
+
 ## Build Commands
 ```bash
 # Default command: run tests and build
@@ -25,7 +31,13 @@ just test
 # Clean build artifacts and bindings
 just clean
 
-# Development workflow: clean, test, and update Swift bindings
+# Linting and formatting
+just fmt          # Format code
+just fmt-check    # Check formatting without modifying
+just clippy       # Run clippy linter
+just lint         # Run all lints (fmt-check + clippy)
+
+# Development workflow: clean, lint, test, and update Swift bindings
 just dev
 
 # Generate language bindings (auto-builds if needed)
@@ -40,7 +52,7 @@ just xcframework
 # or
 ./build-xcframework.sh
 
-# Quick check: validate Swift bindings and run tests
+# Quick check: lint, validate Swift bindings and run tests
 just check
 
 # Full release workflow: clean, test, build everything
