@@ -9,6 +9,21 @@ build:
 test:
     cargo test
 
+# Run clippy linter
+clippy:
+    cargo clippy -- -D warnings
+
+# Format code
+fmt:
+    cargo fmt
+
+# Check formatting without modifying files
+fmt-check:
+    cargo fmt -- --check
+
+# Run all lints (format check + clippy)
+lint: fmt-check clippy
+
 # Clean generated files
 clean:
     cargo clean
@@ -41,12 +56,12 @@ xcframework:
     ./build-xcframework.sh
 
 # Quick check: validate Swift bindings and run tests
-check:
+check: lint
     ./validate-bindings.sh
     cargo test
 
 # Development workflow: clean, test, and update Swift bindings
-dev: clean test swift
+dev: clean lint test swift
 
 # Full release workflow: clean, test, build everything
 release: clean test build all xcframework
