@@ -3,8 +3,14 @@ import PackageDescription
 
 let package = Package(
     name: "stx2btc",
-    platforms: [.iOS(.v13)],
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v14)
+    ],
     products: [
+        .library(
+            name: "stx2btcFFI",
+            targets: ["stx2btcFFI"]),
         .library(
             name: "stx2btc",
             targets: ["stx2btc"]),
@@ -13,8 +19,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "stx2btcFFI",
-            url: "https://github.com/newinternetlabs/stx2btc/releases/download/v0.3.1/stx2btc.xcframework.zip",
-            checksum: "5337bbca90b68698a33fca6647aa42f8557781f60404bc14401a0dbed6298c00"
+            url: "https://github.com/newinternetlabs/stx2btc/releases/download/v0.4.0/stx2btc.xcframework.zip",
+            checksum: "030d1865ff9ebb72779b8debbb87f2d8be35011ce1097b29aac85cbc0910ea04"
         ),
         .target(
             name: "stx2btc",
