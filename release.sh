@@ -64,11 +64,41 @@ gh release create $VERSION \
     --title "Release $VERSION" \
     --notes "Release $VERSION
 
+## New Features
+- ✅ **macOS Support**: Full support for macOS (arm64 + x86_64)
+- ✅ **Dual Products**: Separate \`stx2btcFFI\` (C layer) and \`stx2btc\` (Swift layer) products
+- ✅ **Command-line SPM**: Fixed Swift Package Manager builds from command line
+
+## Platform Support
+- **iOS**: 13.0+ (device + simulator arm64)
+- **macOS**: 14.0+ (arm64 + x86_64 universal)
+
 ## Installation
 
-Add to your Package.swift:
+### Basic Usage
+Add to your Package.swift dependencies:
 \`\`\`swift
 .package(url: \"https://github.com/newinternetlabs/stx2btc\", from: \"${VERSION#v}\")
+\`\`\`
+
+Then add to your target:
+\`\`\`swift
+.target(
+    dependencies: [
+        .product(name: \"stx2btc\", package: \"stx2btc\")
+    ]
+)
+\`\`\`
+
+### Advanced FFI Usage
+For direct FFI access (e.g., for libraries building on stx2btc):
+\`\`\`swift
+.target(
+    dependencies: [
+        .product(name: \"stx2btcFFI\", package: \"stx2btc\"),
+        .product(name: \"stx2btc\", package: \"stx2btc\")
+    ]
+)
 \`\`\`
 
 Checksum: $CHECKSUM"
@@ -87,8 +117,14 @@ import PackageDescription
 
 let package = Package(
     name: "stx2btc",
-    platforms: [.iOS(.v13)],
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v14)
+    ],
     products: [
+        .library(
+            name: "stx2btcFFI",
+            targets: ["stx2btcFFI"]),
         .library(
             name: "stx2btc",
             targets: ["stx2btc"]),

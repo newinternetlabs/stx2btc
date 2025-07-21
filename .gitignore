@@ -6,6 +6,10 @@
 Cargo.lock
 .DS_Store
 
+# Swift Package Manager
+.build/
+.swiftpm/
+
 # Claude Code configuration (user-specific)
 .claude/
 
