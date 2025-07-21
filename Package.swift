@@ -19,7 +19,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "stx2btcFFI",
-            path: "target/xcframework/stx2btc.xcframework"
+            url: "https://github.com/newinternetlabs/stx2btc/releases/download/v0.4.0/stx2btc.xcframework.zip",
+            checksum: "030d1865ff9ebb72779b8debbb87f2d8be35011ce1097b29aac85cbc0910ea04"
         ),
         .target(
             name: "stx2btc",
