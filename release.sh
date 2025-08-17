@@ -116,9 +116,9 @@ gh release create $VERSION \
     --notes "Release $VERSION
 
 ## New Features
-- ✅ **macOS Support**: Full support for macOS (arm64 + x86_64)
-- ✅ **Dual Products**: Separate \`stx2btcFFI\` (C layer) and \`stx2btc\` (Swift layer) products
-- ✅ **Command-line SPM**: Fixed Swift Package Manager builds from command line
+- ✅ **Multi-Network Support**: Added support for mainnet, testnet, and devnet networks
+- ✅ **Auto-Detection**: Automatically detects network from address prefixes (SP/ST for Stacks, bc1/tb1/bcrt1 for Bitcoin)
+- ✅ **Comprehensive Testing**: Added tests for all network conversions and edge cases
 
 ## Platform Support
 - **iOS**: 13.0+ (device + simulator arm64)
