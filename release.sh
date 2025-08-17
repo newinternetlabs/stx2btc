@@ -40,69 +40,6 @@ echo "🔐 Calculating checksum..."
 CHECKSUM=$(swift package compute-checksum target/xcframework/stx2btc.xcframework.zip)
 echo "Checksum: $CHECKSUM"
 
-# Check if tag already exists
-if git rev-parse $VERSION >/dev/null 2>&1; then
-    echo "⚠️  Tag $VERSION already exists locally"
-    # Check if tag exists on remote
-    if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
-        echo "✅ Tag already pushed to remote"
-    else
-        echo "📤 Pushing existing tag to remote..."
-        git push origin $VERSION
-    fi
-else
-    echo "🏷️ Creating git tag..."
-    git tag -a $VERSION -m "Release $VERSION"
-    echo "📤 Pushing tag to remote..."
-    git push origin $VERSION
-fi
-
-# Create GitHub release
-echo "📤 Creating GitHub release..."
-gh release create $VERSION \
-    target/xcframework/stx2btc.xcframework.zip \
-    --title "Release $VERSION" \
-    --notes "Release $VERSION
-
-## New Features
-- ✅ **macOS Support**: Full support for macOS (arm64 + x86_64)
-- ✅ **Dual Products**: Separate \`stx2btcFFI\` (C layer) and \`stx2btc\` (Swift layer) products
-- ✅ **Command-line SPM**: Fixed Swift Package Manager builds from command line
-
-## Platform Support
-- **iOS**: 13.0+ (device + simulator arm64)
-- **macOS**: 14.0+ (arm64 + x86_64 universal)
-
-## Installation
-
-### Basic Usage
-Add to your Package.swift dependencies:
-\`\`\`swift
-.package(url: \"https://github.com/newinternetlabs/stx2btc\", from: \"${VERSION#v}\")
-\`\`\`
-
-Then add to your target:
-\`\`\`swift
-.target(
-    dependencies: [
-        .product(name: \"stx2btc\", package: \"stx2btc\")
-    ]
-)
-\`\`\`
-
-### Advanced FFI Usage
-For direct FFI access (e.g., for libraries building on stx2btc):
-\`\`\`swift
-.target(
-    dependencies: [
-        .product(name: \"stx2btcFFI\", package: \"stx2btc\"),
-        .product(name: \"stx2btc\", package: \"stx2btc\")
-    ]
-)
-\`\`\`
-
-Checksum: $CHECKSUM"
-
 # First, let's make sure we're up to date with remote
 echo "📥 Pulling latest changes..."
 git pull origin $(git rev-parse --abbrev-ref HEAD)
@@ -145,15 +82,77 @@ let package = Package(
 )
 EOF
 
-# Commit and push
+# Commit Package.swift update
 echo "💾 Committing Package.swift update..."
 git add Package.swift
 git commit -m "Update Package.swift for release $VERSION"
 
-# Get current branch name
+# Get current branch name and push
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "📤 Pushing to branch: $BRANCH"
 git push origin $BRANCH
+
+# Check if tag already exists and handle accordingly
+if git rev-parse $VERSION >/dev/null 2>&1; then
+    echo "⚠️  Tag $VERSION already exists locally, deleting and recreating..."
+    git tag -d $VERSION
+    # Delete remote tag if it exists
+    if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
+        git push origin :refs/tags/$VERSION
+    fi
+fi
+
+# Create git tag pointing to the commit with updated Package.swift
+echo "🏷️ Creating git tag..."
+git tag -a $VERSION -m "Release $VERSION"
+echo "📤 Pushing tag to remote..."
+git push origin $VERSION
+
+# Create GitHub release
+echo "📤 Creating GitHub release..."
+gh release create $VERSION \
+    target/xcframework/stx2btc.xcframework.zip \
+    --title "Release $VERSION" \
+    --notes "Release $VERSION
+
+## New Features
+- ✅ **Multi-Network Support**: Added support for mainnet, testnet, and devnet networks
+- ✅ **Auto-Detection**: Automatically detects network from address prefixes (SP/ST for Stacks, bc1/tb1/bcrt1 for Bitcoin)
+- ✅ **Comprehensive Testing**: Added tests for all network conversions and edge cases
+
+## Platform Support
+- **iOS**: 13.0+ (device + simulator arm64)
+- **macOS**: 14.0+ (arm64 + x86_64 universal)
+
+## Installation
+
+### Basic Usage
+Add to your Package.swift dependencies:
+\`\`\`swift
+.package(url: \"https://github.com/newinternetlabs/stx2btc\", from: \"${VERSION#v}\")
+\`\`\`
+
+Then add to your target:
+\`\`\`swift
+.target(
+    dependencies: [
+        .product(name: \"stx2btc\", package: \"stx2btc\")
+    ]
+)
+\`\`\`
+
+### Advanced FFI Usage
+For direct FFI access (e.g., for libraries building on stx2btc):
+\`\`\`swift
+.target(
+    dependencies: [
+        .product(name: \"stx2btcFFI\", package: \"stx2btc\"),
+        .product(name: \"stx2btc\", package: \"stx2btc\")
+    ]
+)
+\`\`\`
+
+Checksum: $CHECKSUM"
 
 # Ensure everything is pushed before declaring success
 echo "🔄 Verifying push..."

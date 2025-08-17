@@ -448,6 +448,7 @@ public enum ConversionError: Swift.Error {
     case UnsupportedVersion
     case SegwitEncode(String
     )
+    case UnsupportedNetwork
 }
 
 
@@ -471,6 +472,7 @@ public struct FfiConverterTypeConversionError: FfiConverterRustBuffer {
         case 3: return .SegwitEncode(
             try FfiConverterString.read(from: &buf)
             )
+        case 4: return .UnsupportedNetwork
 
          default: throw UniffiInternalError.unexpectedEnumCase
         }
@@ -496,6 +498,10 @@ public struct FfiConverterTypeConversionError: FfiConverterRustBuffer {
             writeInt(&buf, Int32(3))
             FfiConverterString.write(v1, into: &buf)
             
+        
+        case .UnsupportedNetwork:
+            writeInt(&buf, Int32(4))
+        
         }
     }
 }
