@@ -40,22 +40,73 @@ echo "🔐 Calculating checksum..."
 CHECKSUM=$(swift package compute-checksum target/xcframework/stx2btc.xcframework.zip)
 echo "Checksum: $CHECKSUM"
 
-# Check if tag already exists
+# First, let's make sure we're up to date with remote
+echo "📥 Pulling latest changes..."
+git pull origin $(git rev-parse --abbrev-ref HEAD)
+
+# Update Package.swift with the release URL
+echo "📝 Updating Package.swift..."
+DOWNLOAD_URL="https://github.com/newinternetlabs/stx2btc/releases/download/$VERSION/stx2btc.xcframework.zip"
+
+cat > Package.swift << EOF
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "stx2btc",
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v14)
+    ],
+    products: [
+        .library(
+            name: "stx2btcFFI",
+            targets: ["stx2btcFFI"]),
+        .library(
+            name: "stx2btc",
+            targets: ["stx2btc"]),
+    ],
+    dependencies: [],
+    targets: [
+        .binaryTarget(
+            name: "stx2btcFFI",
+            url: "$DOWNLOAD_URL",
+            checksum: "$CHECKSUM"
+        ),
+        .target(
+            name: "stx2btc",
+            dependencies: ["stx2btcFFI"],
+            path: "Sources/stx2btc"
+        ),
+    ]
+)
+EOF
+
+# Commit Package.swift update
+echo "💾 Committing Package.swift update..."
+git add Package.swift
+git commit -m "Update Package.swift for release $VERSION"
+
+# Get current branch name and push
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "📤 Pushing to branch: $BRANCH"
+git push origin $BRANCH
+
+# Check if tag already exists and handle accordingly
 if git rev-parse $VERSION >/dev/null 2>&1; then
-    echo "⚠️  Tag $VERSION already exists locally"
-    # Check if tag exists on remote
+    echo "⚠️  Tag $VERSION already exists locally, deleting and recreating..."
+    git tag -d $VERSION
+    # Delete remote tag if it exists
     if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
-        echo "✅ Tag already pushed to remote"
-    else
-        echo "📤 Pushing existing tag to remote..."
-        git push origin $VERSION
+        git push origin :refs/tags/$VERSION
     fi
-else
-    echo "🏷️ Creating git tag..."
-    git tag -a $VERSION -m "Release $VERSION"
-    echo "📤 Pushing tag to remote..."
-    git push origin $VERSION
 fi
+
+# Create git tag pointing to the commit with updated Package.swift
+echo "🏷️ Creating git tag..."
+git tag -a $VERSION -m "Release $VERSION"
+echo "📤 Pushing tag to remote..."
+git push origin $VERSION
 
 # Create GitHub release
 echo "📤 Creating GitHub release..."
@@ -102,58 +153,6 @@ For direct FFI access (e.g., for libraries building on stx2btc):
 \`\`\`
 
 Checksum: $CHECKSUM"
-
-# First, let's make sure we're up to date with remote
-echo "📥 Pulling latest changes..."
-git pull origin $(git rev-parse --abbrev-ref HEAD)
-
-# Update Package.swift with the release URL
-echo "📝 Updating Package.swift..."
-DOWNLOAD_URL="https://github.com/newinternetlabs/stx2btc/releases/download/$VERSION/stx2btc.xcframework.zip"
-
-cat > Package.swift << EOF
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "stx2btc",
-    platforms: [
-        .iOS(.v13),
-        .macOS(.v14)
-    ],
-    products: [
-        .library(
-            name: "stx2btcFFI",
-            targets: ["stx2btcFFI"]),
-        .library(
-            name: "stx2btc",
-            targets: ["stx2btc"]),
-    ],
-    dependencies: [],
-    targets: [
-        .binaryTarget(
-            name: "stx2btcFFI",
-            url: "$DOWNLOAD_URL",
-            checksum: "$CHECKSUM"
-        ),
-        .target(
-            name: "stx2btc",
-            dependencies: ["stx2btcFFI"],
-            path: "Sources/stx2btc"
-        ),
-    ]
-)
-EOF
-
-# Commit and push
-echo "💾 Committing Package.swift update..."
-git add Package.swift
-git commit -m "Update Package.swift for release $VERSION"
-
-# Get current branch name
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo "📤 Pushing to branch: $BRANCH"
-git push origin $BRANCH
 
 # Ensure everything is pushed before declaring success
 echo "🔄 Verifying push..."
